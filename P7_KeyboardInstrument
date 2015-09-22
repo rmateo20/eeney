@@ -1,0 +1,62 @@
+//setting up the array 'integers' with 6 slots
+//each slot will hole a frequency value corresponding to a musical note
+//middle C = 262 Hz
+//D = 294 Hz
+//E = 330 Hz
+//F - 349 Hz
+
+int buttons[6];
+
+//give the first element of the array the value of 2
+//arrays begin with a slot address of 0
+int buttons[0] = 2;
+
+//define an array of four notes
+//this array can be procedurally defined as well
+//this is the shorthand for creating an array and assigning value to each slot
+//since this array is declared before Setup, it is also a global variable
+int notes[] = {262, 294, 330, 349};
+
+void setup(){
+  Serial.begin (9600); //Open a serial port
+}
+
+//begin loop
+void loop(){
+  int keyVal = analogRead(A0); //this variable will hold the value read on pin A0
+  //each button has a different resistor, and as such will have a different reading when pressed
+  Serial.println(keyVal);
+  
+  //conditional statements linking button presses to note activation
+  //play tone when specific reading occurs
+  //else play no tone
+  //requires adjustment based on actual resistor value read from serial port
+  //stuttering may occur due to fluctations at the resistor, range should be widened
+  
+  //NOTE: Only one frequency can play on a pin at any given time, so pressing multiple buttons only plays one sound 
+  //If you wish multiple simultaneous button presses to play a sound, it must be defined in the code
+  //REFERENCE: arduino.cc/frequencies
+  
+  //NOTE: tone() only generates square waves, not sines or triangles
+  //NOTE: tone() will interfere with analogWrite on pins 3 and 11
+  
+  if(keyVal == 1023){
+    tone(8, notes[0]);
+  }
+  
+  else if(keyVal >= 990 && keyVal <= 1010){
+    tone(8, notes[1]);
+  }
+  
+  else if(keyVal >= 505 && keyVal <= 515){
+    tone(8, notes[2]);
+  }
+  else if(keyVal >= 5 && keyVal <= 10){
+    tone(8, notes[3]);
+  }
+  
+  else{
+    noTone(8); //VERY IMPORTANT: when no buttons are being pressed, the noTone function stops all sound from playing
+    //since the tone function does not automatically stop playing a note, it only activates forever
+  }
+}
