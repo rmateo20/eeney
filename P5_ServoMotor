@@ -1,0 +1,38 @@
+#include <Servo.h>
+
+//creating an object variable called myServo
+Servo myServo;
+
+//Constants and Variables
+int const potPin = A0; //This is the pin we'll attach the potentiometer to
+int potVal; //This variable will hold the potentiometer readings
+int angle; //This variable will hold the potentiometer readings converted to angles
+
+void setup(){
+  myServo.attach (9); //My servo will be attached to pin 9
+  
+  Serial.begin(9600); //Open serial connection
+}
+
+//begin loop
+void loop(){
+  //read analog input and print out the value to the serial monitor
+  potVal = analogRead(potPin);
+  Serial.print("potVal: ");
+  Serial.print(potVal);
+  
+  //use the map function to scale values for me
+  //arguments: number to be scaled (in this case potVal), input min, input max, output min, output max
+  //store this value in variable 'angle'
+  angle = map(potVal, 0, 1023, 0, 179);
+
+  //print out mapped variable to Serial
+  Serial.print(", angle: ");
+  Serial.print(angle);
+  
+  //tell the servo to move using write
+  myServo.write(angle);
+  //include delay to give time for servo to move, can be adjusted
+  delay(15);
+}
+
