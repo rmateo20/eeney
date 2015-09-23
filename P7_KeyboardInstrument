@@ -5,11 +5,11 @@
 //E = 330 Hz
 //F - 349 Hz
 
-int buttons[6];
+//example: int buttons[6];
 
 //give the first element of the array the value of 2
 //arrays begin with a slot address of 0
-int buttons[0] = 2;
+//example: int buttons[0] = 2;
 
 //define an array of four notes
 //this array can be procedurally defined as well
