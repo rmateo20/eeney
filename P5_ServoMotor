@@ -28,7 +28,7 @@ void loop(){
 
   //print out mapped variable to Serial
   Serial.print(", angle: ");
-  Serial.print(angle);
+  Serial.println(angle);
   
   //tell the servo to move using write
   myServo.write(angle);
