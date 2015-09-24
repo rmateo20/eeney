@@ -1,0 +1,29 @@
+//constants and variables
+const int switchPin = 2;
+const int motorPin = 9;
+
+//a variable to hold the value/state of the switch
+//i.e. on or off, 0 or 1;
+int switchState = 0;
+
+//define pin functions
+//i.e. where your switch and motor are plugged in
+void setup(){
+  pinMode(motorPin, OUTPUT);
+  pinMode(switchPin, INPUT);
+}
+
+//begin loop
+void loop(){
+  switchState = digitalRead(switchPin);
+  
+  if (switchState == HIGH) {   //if the switch is pressed (i.e. a signal is received from the switchPin), or ON
+    digitalWrite(motorPin, HIGH);  //then turn ON the motor attached to motorPin
+  }
+  
+  else {
+    digitalWrite(motorPin, LOW); //otherwise, keep the motor turned OFF, i.e. anytime there's no signal from switchPin
+  }
+}
+
+//simple commands but with a physical result!
