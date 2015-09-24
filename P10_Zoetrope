@@ -30,9 +30,9 @@ void setup(){
 void loop(){
   //read all your pin states
   onOffSwitchState = digitalRead(onOffSwitchStateSwitchPin);
-  delay (1);
+  delay(1);
   directionSwitchState = digitalRead(directionSwitchPin);
-  motorSpeed - analogRead(potPin)/4;
+  motorSpeed = analogRead(potPin)/4;
   
   //check to see if the on/off sensor has changed
   //i.e. If there is a difference between the current switch state and the previous, AND the switch is currently set HIGH
@@ -70,7 +70,7 @@ void loop(){
   //i.e. if the motorEnabled variable is 1, set the speed of the motor using analogWrite) to PWM the enable pin
   //if motorEnabled is 0, then turn the motor off by setting the analogWrite value to 0
   
-  if (motorEnabled ==1) {
+  if (motorEnabled == 1) {
     analogWrite(enablePin, motorSpeed);
   }
   
