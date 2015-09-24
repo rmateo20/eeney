@@ -1,0 +1,86 @@
+//constants and variables
+const int controlPin1 = 2;
+const int controlPin2 = 3;
+const int enablePin = 9;
+const int directionSwitchPin = 4;
+const int onOffSwitchStateSwitchPin = 5;
+const int potPin = A0;
+
+int onOffSwitchState = 0; //is this thing on?
+int previousOnOffSwitchState = 0;  //was this thing on?
+int directionSwitchState = 0; //which way did he go, which way did he go?
+int previousDirectionSwitchState = 0; //which way did he go last time?
+
+int motorEnabled = 0; //is that thing on?
+int motorSpeed = 0; //excuse me sir do you know how fast you were going?
+int motorDirection = 1; //he's going down down in an earlier round
+
+//define your inputs and outputs
+void setup(){
+  pinMode(directionSwitchPin, INPUT);
+  pinMode(onOffSwitchStateSwitchPin, INPUT);
+  pinMode(controlPin1, OUTPUT);
+  pinMode(controlPin2, OUTPUT);
+  pinMode(enablePin, OUTPUT);
+
+  digitalWrite(enablePin, LOW); //this makes sure the motor doesn't start spinning on powerup by setting the enablePin to off
+}
+
+//begin loop
+void loop(){
+  //read all your pin states
+  onOffSwitchState = digitalRead(onOffSwitchStateSwitchPin);
+  delay (1);
+  directionSwitchState = digitalRead(directionSwitchPin);
+  motorSpeed - analogRead(potPin)/4;
+  
+  //check to see if the on/off sensor has changed
+  //i.e. If there is a difference between the current switch state and the previous, AND the switch is currently set HIGH
+  //THEN set the motorPower variable to 1. If it is LOW, set the variable to 0
+  if (onOffSwitchState != previousOnOffSwitchState){
+    if (onOffSwitchState == HIGH){
+      motorEnabled = !motorEnabled;
+    }
+  }
+  
+  //check to see if the direction has changed
+  //i.e. If the direction switch is in a different position than previously, THEN change the motorDirection variable.
+  //switch between two states by using the inversion operator motorDirection = !motorDirection
+  if (directionSwitchState != previousDirectionSwitchState){
+    if (directionSwitchState == HIGH){
+      motorDirection = !motorDirection;
+    }
+  }
+  
+  //Change the pins to turn the motor in the proper direction
+  //i.e. the motorDirection variable determines which direction the motor is turning.
+  //The motor uses two control pins to determine direction, setting one HIGH and one LOW
+  //To reverse direction, one is set LOW and the other HIGH
+  if (motorDirection == 1){
+    digitalWrite(controlPin1, HIGH);
+    digitalWrite(controlPin2, LOW);
+  }
+  
+  else {
+    digitalWrite(controlPin1, LOW);
+    digitalWrite(controlPin2, HIGH);
+  }
+  
+  //PWM the motor if it is enabled
+  //i.e. if the motorEnabled variable is 1, set the speed of the motor using analogWrite) to PWM the enable pin
+  //if motorEnabled is 0, then turn the motor off by setting the analogWrite value to 0
+  
+  if (motorEnabled ==1) {
+    analogWrite(enablePin, motorSpeed);
+  }
+  
+  else {
+    analogWrite(enablePin,0);
+  }
+  
+  //Save the current states for the next loop
+  //i.e. before exiting loop(), save the current state of the switches by overwriting the previous data and
+  //using those values for the next run through of the program
+  previousDirectionSwitchState = directionSwitchState;
+  previousOnOffSwitchState = onOffSwitchState;
+}
