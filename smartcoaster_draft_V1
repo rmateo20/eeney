@@ -1,0 +1,91 @@
+#include "FastLED.h"  //enables access to the FastLED Library
+#define NUM_LEDS 25 //sets string length
+CRGB leds[NUM_LEDS]; //defines LED types for all LEDs set above
+
+//thermistor variables
+const int sensorPin = A0; //defines pin A0 as the sensor pin and takes data from the component through A0
+const float baselineTemp = 26.0; //defines baselineTemp as a 'zeroing' variable and sets it to 20.0.
+
+//LED color value variables initialized at 0
+int previousRedValue = 0;
+int previousGreenValue = 0;
+int previousBlueValue = 0;
+int redValue = 0;
+int greenValue = 0;
+int blueValue = 0;
+
+
+//LED fading variables
+int fadeAmount = 1;  // magnitude of fade in units whole divisors of 255 in each cycle
+  //i.e. 1, 3, 5, 15, 17, 51, 85, 255
+  //5 = slow fade, 255 = near instant fade
+  //maybe smoother transitions with a percentage
+  //floats not appropriate due to Uno memory limitations
+int brightness = 0;  // initial value of the variable at start of sketch
+
+//setup for the specific type of led string, in this case the Neopixel/WS2812B
+void setup() { 
+      Serial.begin(9600); //open a serial port for diagnostic monitoring
+      FastLED.addLeds<NEOPIXEL, 6>(leds, NUM_LEDS);
+}
+
+//begin loop, fading LEDs in series, and thermistor read to conversion loop with monitoring
+ void loop() {
+        //thermistor programming
+        int sensorVal = analogRead(sensorPin); //declares a variable to hold your sensor readings
+        Serial.print("Sensor Value: ");//Show sensor value 
+        Serial.print(sensorVal);
+        //convert the ADC reading to voltage
+        float voltage = (sensorVal/1024.0) * 5.0; //note that floats must be in decimal format not whole number
+          //voltage conversion must be calibrated to account for additional resistance of LED strip
+        Serial.print(", Volts: "); //Show sensor value converted to voltage
+        Serial.print(voltage);
+        Serial.print(", degrees C: "); //Show sensor value converted to Celsius
+        //convert the voltage to degrees Celsius
+        float temperatureC = (voltage - .5) * 70;
+        Serial.print(temperatureC);
+        Serial.print(", degrees F: "); //Show sensor value converted to Celsius
+        //convert degrees Celsius to degrees Fahrenheit
+        float temperatureF = temperatureC * 1.8 + 32;
+        Serial.print(temperatureF);
+       
+        Serial.print(", Red: ");
+        Serial.print(redValue);
+        Serial.print(", Grn: ");
+        Serial.print(greenValue);
+        Serial.print(", Blu: ");
+        Serial.println(blueValue);
+
+        
+        //LED Control programming
+        for(int dot = 0; dot < NUM_LEDS; dot++) {
+          if(temperatureF > 72){
+              redValue = (temperatureF - 72) * 4;
+              greenValue = 0;
+              blueValue = 0;
+
+          }
+            
+          else if(temperatureF < 68){
+              redValue = 0;
+              greenValue = 0;
+              blueValue = 204-(temperatureF * 3);
+          }
+          else{
+              redValue = 4;
+              greenValue = 4;
+              blueValue = 4;
+          }  
+            
+            leds[dot].setRGB(redValue,greenValue,blueValue); //change LED to color based on temperature reading
+            //leds[dot].fadeLightBy(brightness);
+          //brightness = brightness + fadeAmount;
+          // reverse the direction of the fading at the ends of the fade:
+          
+          //if(brightness == 0 || brightness == 255){
+            //fadeAmount = -fadeAmount ;
+            //}             
+        FastLED.show();     
+        }
+          delay(100); //time-based fade delay, 5 - 75 is a good starting range but flicker becomes noticable at high values
+    }
