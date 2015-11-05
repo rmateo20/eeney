@@ -1,0 +1,160 @@
+SimpleOpenNI  kinect;
+import processing.opengl.*;
+import SimpleOpenNI.*;
+
+ArrayList<Particle> particles;
+
+color[]       userClr = new color[]{ color(0,255,0),
+                                     color(255,0,0),                                    
+                                     color(0,0,255),
+                                     color(255,255,0),
+                                     color(255,0,255),
+                                     color(0,255,255),
+                                     color(175,175,175),                                     
+                                     color(175,0,175),
+                                     color(175,175,0),
+                                     color(0,175,175)
+                                   };
+
+PImage  userImage;
+int userID;
+int[] userMap;
+
+PImage rgbImage;
+
+PImage myImage;
+
+float vone;
+float vome;
+
+void setup() {
+  size(640, 480, P3D);
+  smooth();
+  kinect = new SimpleOpenNI(this);
+  kinect.enableDepth();
+  kinect.enableUser();
+  kinect.enableUser(SimpleOpenNI.SKEL_TORSO); 
+  
+    
+  myImage = loadImage("../myImage.jpg"); // this may be changed by hand, or different images may be saved using the same name
+  //can be upgraded by cycling through an image bank at specified intervals, either sequentially or randomly
+
+  particles = new ArrayList<Particle>();
+
+}
+
+void draw() {
+  background(0); //refresh the background every draw cycle and clear old images
+
+  hint(DISABLE_DEPTH_TEST); //Disable 3D Rendering temporarily to draw in 2D 
+  camera();                 //Disable 3D Rendering temporarily to draw in 2D 
+  noLights();               //Disable 3D Rendering temporarily to draw in 2D 
+  kinect.update();
+
+  
+  IntVector userList = new IntVector(); 
+  kinect.getUsers(userList);             
+  int [] userArray = kinect.getUsers();
+
+/* ------------ User Detection ---------------*/
+  if (userArray.length > 0) {   // if we have detected any users 
+
+
+    userMap = kinect.userMap();     
+    loadPixels();   // populate the pixels array from the sketch's current contents
+
+
+    for (int i = 0; i < userMap.length; i++) {
+
+      if (userMap[i] !=0) {      // if the current pixel is on a user pixel is not zero
+
+        //pixels[i] = color(myImage.pixels[i]); // transfer the pixel information from the source 1:1
+
+        float c = random(5);
+        pixels[i] = color(myImage.pixels[i+int(c)]); // transfer the pixel information from the source with noise targeting a different pixel
+ 
+ 
+      }//end pixel detection if loop
+
+    }  //end scan of entire depthmap for loop
+
+    updatePixels();    // display the changed pixel array
+
+  } //end user detection if loop
+
+
+/* ------------ Draw Particles ---------------*/
+  for (int u=0; u<userList.size(); u++) {  // for each user
+        int userId = userList.get(u);
+        PVector position = new PVector();
+        kinect.getCoM(userId, position); 
+        kinect.convertRealWorldToProjective(position, position);
+        
+        /* Draw something originating from the position of center of mass*/
+        
+        particles.add(new Particle(new PVector(position.x, position.y)));
+        
+          for(int i=0; i<particles.size(); i++){
+               Particle p = particles.get(i);
+               p.run();
+                 if(p.isDead()){
+                  particles.remove(i);
+                 } 
+          }
+  }
+  hint(ENABLE_DEPTH_TEST); //Re-Enable 3D Rendering
+
+  /* ------------ BEGIN 3D DRAWN PORTION -------------*/
+  /* Vome 3D Sphere Code via http://www.openprocessing.org/sketch/60356 */
+  /* Written by Adam Lastowka */
+  /* Modified to work with Kinect by Rob Mateo */
+  
+  loadPixels();
+  for(int i = 0; i < width*height; i++) {
+    float r = red(pixels[i]);
+    float g = green(pixels[i]);
+    float b = blue(pixels[i]);
+    r /= 4.2;  //mutes colors, original values 1.2; introduce *random(10); for sparkles
+    g /= 4.2; //mutes colors, original values 1.2; introduce *random(10); for sparkles
+    b /= 4.2; //mutes colors, original values 1.2; introduce *random(10); for sparkles
+    color col = color(r, g, b);
+    pixels[i] = col;
+  }
+  //updatePixels();
+  translate(width/2, height/2);
+  
+  PVector position = new PVector();      // instantiate a new local position variable
+  kinect.getCoM(1, position);             // give sphere control to the first user detected
+  kinect.convertRealWorldToProjective(position, position);  //convert 1st user's position to x y
+ 
+ 
+  if (userArray.length > 0) {  //if at least one user is detected
+    rotateY(map(position.x, 0, width, -PI, PI));  //rotate sphere based on user 1 position
+    rotateX(map(position.y, 0, height, -PI, PI));
+  }
+  else {  // else if no users detected
+    
+    float xAutopilot = width*noise(1);
+    float yAutopilot = height*noise(1);
+    
+    rotateY(map(xAutopilot, 0, width, -PI, PI));  //rotate sphere randomly
+    rotateX(map(yAutopilot, 0, height, -PI, PI));
+  }
+  
+  for(int i = 0; i < 12000; i++) {  
+    stroke(0, 255, 0);
+    rotateX(vone);
+    rotateZ(0);
+    rotateY(vome-float(i)*1.305);
+    point(100, 100, 0);
+  }
+  vone -= 0.01;
+  vome += 0.02;  
+  
+  /* ----------- END OF 3D DRAWN PORTION -------------*/
+  updatePixels();
+  
+
+  
+  
+} //end draw()
