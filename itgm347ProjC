@@ -1,0 +1,41 @@
+//Written by Rob Mateo
+//Using a soft potentiometer to control the color of a string of Adafruit Smart NeoPixels Ver. 2
+//driven by a LilyPad wearable processor and the Arduino 1.0.5 IDE
+//Hue-Value-Saturation color model via FastLED 3.X Library
+//Diagnostics included via Serial Port
+
+#include <FastLED.h>
+
+const int colourInPin = A2; //Soft Pot "handle" attached to this analog pin
+ 
+int currentColorValueBlue; //Soft Pot var
+
+
+#define LED_PIN 6        // which pin are LEDS connected to? I think this value must be Pin 6 as of this build
+#define NUM_LEDS 35         // number of LEDs in the chain   
+#define COLOR_ORDER RGB    //Use "rainbow" color table instead of narrower "spectrum" color table
+#define LED_TYPE WS2812Controller800Khz    //WS2812Controller800Khz = Flora Smart NeoPixels V2
+
+struct CRGB leds[NUM_LEDS]; // Create multi type array to control the neopix
+
+void setup()
+{
+  FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+  Serial.begin(9600); //Open a serial port for monitoring and diagnostics
+}
+ 
+void loop(){
+      int mappedHue;
+      for(int i = 0; i < NUM_LEDS; i++) {
+          mappedHue = map(analogRead(colourInPin), 0, 1024, 0, 255);
+          // Set the i'th LED to the chosen colour
+          leds[i] = CHSV(mappedHue, 255, 255);
+          // Show the leds
+          FastLED.show();
+      }
+
+      //diagnostics      
+      Serial.print("Mapped Hue: ");
+      Serial.println(mappedHue);
+ 
+}
